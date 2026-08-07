@@ -1,5 +1,7 @@
 # CRT TV Signal Emulation Base Template
 
+![example](example.png)
+
 Generic POSIX shell baseline engine (`tv.sh`) designed to batch-process video files through an `ffmpeg` DSP pipeline to simulate CRT display characteristics and audio hardware constraints.
 
 ## Core Architecture

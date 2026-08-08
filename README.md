@@ -28,7 +28,9 @@ chmod +x convert.sh
 4. Pick the path to a single video file or a directory of
    `.avi`/`.mp4`/`.mkv`/`.webm` files (or pass it as the first CLI argument).
 
-Processed videos are written to `out/<name>_<signal>_<chassis>.mkv`.
+Processed videos are written to `out/` next to the source video(s), as
+`<name>_<signal>_<chassis>.mkv`. For a directory of inputs this is
+`<input_dir>/out/`; for a single file it's the file's folder.
 
 Non-interactive example (broadcast -> weak B/W signal -> Funai chassis):
 
@@ -47,7 +49,6 @@ lib/engine.sh    fragment loader + pipeline assembler
 chassis/*        TV display + speaker path per model
 tv/              broadcast reception degradation
 vhs/             tape playback degradation
-out/             rendered videos (created on demand)
 ```
 
 ## License

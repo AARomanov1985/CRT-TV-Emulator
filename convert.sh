@@ -67,8 +67,12 @@ else
   done
 fi
 
-mkdir -p "$ROOT/out"
-out_dir="$ROOT/out"
+if [ -d "$input_path" ]; then
+  out_dir="$input_path/out"
+else
+  out_dir="$(dirname "$input_path")/out"
+fi
+mkdir -p "$out_dir"
 
 has_files=0
 if [ -d "$input_path" ]; then

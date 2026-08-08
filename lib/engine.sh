@@ -1,5 +1,25 @@
 #!/bin/sh
 
+# Raster invariant: every chassis is a 625-line/50Hz set (SECAM/PAL D/K, or a
+# multisystem set used in 625 mode), so the active raster is always 576 rows.
+# 768 is the BT.601 square-pixel width for a 4:3 625-line picture. This canvas
+# is NOT a per-tube resolution claim: the horizontal detail a 51cm shadow mask
+# resolves (~450-600 TVL) is below 768, and that shortfall is modeled by the
+# CH_BLUR/CH_GRID/CH_CURVES stages, not by changing the raster size.
+#
+#   chassis       tube               line std   raster rows
+#   rubin_51tc    51LK2B/51LK1B      625/50     576
+#   gorizont_51tc412  51LK2B         625/50     576
+#   electron_51tc433d 51LK2B         625/50     576
+#   photon_51tc408d   51LK2B         625/50     576
+#   funai_tv2000mk7   20in color     625/50     576 (525 NTSC capable)
+#   goldstar_ck20e40  20in color     625/50     576 (525 NTSC capable)
+#   junost_402b       31LK4B 31cm mono  625/50  576 (no chroma decode)
+#
+# The only chassis that behaves differently is junost_402b: its 31LK4B tube
+# has no color decoder. Setting CH_LUMA drops the SIG_CHROMA stage entirely
+# and folds the frame to luma-only, so no chroma work is ever faked for it.
+
 process_file() {
   input="$1"
   output="$2"
@@ -10,8 +30,13 @@ process_file() {
   video_chain="[0:v]scale=768:576:force_original_aspect_ratio=decrease, \
       pad=768:576:(ow-iw)/2:(oh-ih)/2"
   [ -n "${SIG_PRE}" ] && video_chain="${video_chain}, ${SIG_PRE}"
-  video_chain="${video_chain}, ${SIG_NOISE}, ${SIG_CHROMA}, \
-      ${CH_BLUR}, ${CH_EQ}, ${CH_GRID}, ${CH_CURVES}, ${CH_VIGNETTE} [v_crt]"
+  video_chain="${video_chain}, ${SIG_NOISE}"
+  if [ -n "${CH_LUMA}" ]; then
+    video_chain="${video_chain}, ${CH_LUMA}"
+  else
+    video_chain="${video_chain}, ${SIG_CHROMA}"
+  fi
+  video_chain="${video_chain}, ${CH_BLUR}, ${CH_EQ}, ${CH_GRID}, ${CH_CURVES}, ${CH_VIGNETTE} [v_crt]"
 
   filter_complex="$video_chain"
 

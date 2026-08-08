@@ -1,5 +1,7 @@
 # CRT TV Emulator
 
+![strong_signal_color](chassis/daewoo_dtc20u1/strong_signal_color.png)
+
 FFmpeg pipeline for end-to-end signal degradation, modeling analog video and audio through combined processing stages.
 
 This models the complete physical hardware path as processing steps:

@@ -1,25 +1,28 @@
 # TDK E-180 (PAL/SECAM) - base model fragment.
 #
-# TDK was the most common quality cassette in 1990s Europe / ex-USSR: 180
-# minutes SP on a 257 m tape (about 14-15 um base), VHS SP ~2.339 cm/s. Its
-# oxide is denser than the bazaar cheapies, so the FM luma carrier holds
-# detail well (close to the format's ~240 TVL ceiling) and the chroma-under
-# band stays tidy.
+# Model fragments define the CASSETTE HARDWARE as parameters, NOT as final
+# SIG_* variables. The engine's build_vhs_sig() combines these with the chosen
+# vhs_cond/<condition> deltas to produce SIG_PRE/SIG_NOISE/SIG_CHROMA, so the
+# model's character survives degradation (a worn TDK still plays like a TDK).
 #
-# This fragment is the *model*: a factory-fresh, never-recorded tape. It sets
-# the hardware baseline. Conditions (vhs_cond/*) override these variables on
-# top to degrade playback (rental wear, humidity, generations, etc).
+# TDK: 1990s EU/ex-USSR quality standard. 257 m E-180 (VHS SP ~2.339 cm/s).
+# Dense oxide, modestly tight noise floor.
 #
-#   SIG_PRE      input conditioning (undersample clamp + chroma collapse;
-#                a properly functioning deck shows no wander band on fresh
-#                tape, so the model carries none - conditions add theirs)
-#   SIG_NOISE    playback FM noise
-#   SIG_CHROMA   chroma-under phase offset
+#   TAPE_SMP        undersample clamp target (luma loses HF before the collapse)
+#   TAPE_BLURH      chroma-under collapse radius
+#   TAPE_BLURL      luma box radius
+#   TAPE_NOISE      FM noise floor strength
+#   TAPE_CH_*       chroma-under phase offset
+#   TAPE_AMP/HI/LO  hiss floor (amplitude / highpass / lowpass)
 
-SIG_PRE="scale=512:384,scale=768:576,boxblur=chroma_radius=6:luma_radius=1"
-SIG_NOISE="noise=alls=4:allf=t+u"
-SIG_CHROMA="chromashift=cbh=1:crh=-1:cbv=0:crv=0"
-BG_COLOR=white
-BG_AMPLITUDE=0.0009
-BG_HIGHPASS=110
-BG_LOWPASS=9500
+TAPE_SMP="512:384"
+TAPE_BLURH=6
+TAPE_LUMAR=1
+TAPE_NOISE=4
+TAPE_CH_CBH=1
+TAPE_CH_CRH=-1
+TAPE_CH_CBV=0
+TAPE_CH_CRV=0
+TAPE_AMP=0.0009
+TAPE_HIGHPASS=110
+TAPE_LOWPASS=9500

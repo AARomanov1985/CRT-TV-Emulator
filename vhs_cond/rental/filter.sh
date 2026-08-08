@@ -1,15 +1,24 @@
-# Rental condition: the video shop copy that has been played a hundred times.
+# Rental condition - degradation deltas on top of the model.
 #
-# Real mechanics: rental stock racks up passes fast, so the oxide pretture
-# degrades (higher FM noise), the head-switch band widens and wanders, and
-# dropouts accumulate. Chroma-under bleeds from the worn surface.
+# A video-shop copy played a hundred times. Everything here is additive to the
+# chosen cassette model: beer box: deck headaches heavier the WORLD below.
+# The undersample clamp tightens (worse res), chroma collapse widens, FM noise
+# rises, and a thin slow head-switch band shows.
 #
-# Overrides the tdk_e180 model baseline with the "abused by a rental deck" set.
+#   DEG_SMP        override clamp target (smaller = more HF loss)
+#   DEG_BLURH      + chroma collapse radius
+#   DEG_NOISE      + FM noise floor
+#   DEG_CBH/CRH..  + chroma-under phase drift
+#   DEG_WAND       head-switch band: multiplier expr in geq lum()
+#   DEG_AMP        hiss amplitude (model-relative)
 
-SIG_PRE="scale=384:288,scale=768:576,boxblur=chroma_radius=8:luma_radius=1.5,geq=lum='lum(X,Y)*if(lt(abs(Y-mod(N*0.15,540)),6),0.85,1)':cb='cb(X,Y)':cr='cr(X,Y)'"
-SIG_NOISE="noise=alls=14:allf=t+u"
-SIG_CHROMA="chromashift=cbh=3:crh=-2:cbv=2:crv=-1"
-BG_COLOR=white
-BG_AMPLITUDE=0.003
-BG_HIGHPASS=100
-BG_LOWPASS=6500
+DEG_SMP="384:288"
+DEG_BLURH=2
+DEG_NOISE=10
+DEG_CBH=1
+DEG_CRH=-1
+DEG_CBV=1
+DEG_CRV=-1
+DEG_WAND="if(lt(abs(Y-mod(N*0.125,540)),5),0.92,1)"
+DEG_AMP=0.0028
+DEG_LOWPASS=6800

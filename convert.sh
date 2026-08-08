@@ -61,6 +61,9 @@ echo "Selected chassis: $chassis_name"
 if [ -n "$condition_name" ]; then
   . "$ROOT/vhs_cond/$condition_name/filter.sh"
 fi
+if [ "$src_choice" = "2" ]; then
+  build_vhs_sig
+fi
 . "$ROOT/chassis/$chassis_name/filter.sh"
 
 input_path=""

@@ -1,16 +1,23 @@
-# Sticky-shed / humidity damaged tape: chroma melt, heavy softness, dropouts.
+# Humid-damaged condition - degradation deltas on top of the model.
 #
-# Real mechanics: hydrolysis makes the oxide stick to deck parts, so the FM
-# luma carrier loses SNR catastrophically (moisture drift -> gain pumping),
-# chroma-under collapses, and the deck's servo drops tracking all over the
-# frame — playback shows wobble bands that dart around, dropout blotches, and
-# the whole picture shimmers. Aggressive undersampling + a full 4:1:0 chroma
-# collapse + a fast darting tracking band.
+# Sticky-shed / humidity damage: oxide shedding destroys the FM SNR, chroma
+# bleeds hard, luma smears. Real signature: the transport JERKS as the tape
+# sticks - a band tears luma sideways - and the FM carrier dropouts flicker
+# white. That replaces the clean head-switch drift: this tape does not drift,
+# it seizes.
+#
+# DEG_LUM is a full geq luma expression (not a *multiplier): it samples a
+# shifted pixel for the tear, so it must override lum(X,Y) entirely.
 
-SIG_PRE="scale=320:240,scale=768:576,format=yuv410p,format=yuv420p,boxblur=chroma_radius=10:luma_radius=2,geq=lum='lum(X,Y)*if(lt(abs(Y-mod(N*7,540)),10),0.62,if(lt(abs(Y-mod(N*7+70,540)),6),1.25,1))':cb='cb(X,Y)':cr='cr(X,Y)'"
-SIG_NOISE="noise=alls=24:allf=t+u"
-SIG_CHROMA="chromashift=cbh=4:crh=-4:cbv=2:crv=-2"
-BG_COLOR=white
-BG_AMPLITUDE=0.0045
-BG_HIGHPASS=90
-BG_LOWPASS=4800
+DEG_SMP="320:240"
+DEG_BLURH=4
+DEG_LUMAR=1
+DEG_NOISE=20
+DEG_CBH=3
+DEG_CRH=-3
+DEG_CBV=2
+DEG_CRV=-2
+DEG_LUM="if(lt(abs(Y - mod(N*40,540)),2), lum(max(0,X-9),Y), lum(X,Y)) + if(lt(Y, mod(N*23,540)+26)*gt(Y, mod(N*23,540)), if(lt(mod(X*47+Y*23+N*13,13),2),255,0),0)"
+DEG_AMP=0.0045
+DEG_HIGHPASS=90
+DEG_LOWPASS=4800

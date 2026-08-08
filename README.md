@@ -23,13 +23,15 @@ chmod +x convert.sh
 ```
 
 1. Pick a signal source: `1` TV broadcast signal or `2` VHS cassette.
-2. Pick a signal (reception quality / tape wear).
+2. Pick a signal (reception quality), or for VHS: pick the cassette model,
+   then the tape condition (commercial / rental / recorded-over /
+   humid-damaged).
 3. Pick a TV chassis.
 4. Pick the path to a single video file or a directory of
    `.avi`/`.mp4`/`.mkv`/`.webm` files (or pass it as the first CLI argument).
 
 Processed videos are written to `out/` next to the source video(s), as
-`<name>_<signal>_<chassis>.mkv`. For a directory of inputs this is
+`<name>_<signal>_<condition>_<chassis>.mkv`. For a directory of inputs this is
 `<input_dir>/out/`; for a single file it's the file's folder.
 
 Non-interactive example (broadcast -> weak B/W signal -> Funai chassis):
@@ -48,7 +50,8 @@ fragment, and `lib/engine.sh` merges them into a single FFmpeg filter graph.
 lib/engine.sh    fragment loader + pipeline assembler
 chassis/*        TV display + speaker path per model
 tv/              broadcast reception degradation
-vhs/             tape playback degradation
+vhs/             cassette models (as-new hardware baseline)
+vhs_cond/        tape conditions (degradation overrides)
 ```
 
 ## License

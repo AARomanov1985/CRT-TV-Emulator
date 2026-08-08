@@ -48,10 +48,19 @@ done
 source_name="$(choose_from "$source_dir" "Choose signal:")"
 echo "Selected source: $source_name"
 
+condition_name=""
+if [ "$src_choice" = "2" ]; then
+  condition_name="$(choose_from "$ROOT/vhs_cond" "Choose tape condition:")"
+  echo "Selected condition: $condition_name"
+fi
+
 chassis_name="$(choose_from "$ROOT/chassis" "Choose TV chassis:")"
 echo "Selected chassis: $chassis_name"
 
 . "$source_dir/$source_name/filter.sh"
+if [ -n "$condition_name" ]; then
+  . "$ROOT/vhs_cond/$condition_name/filter.sh"
+fi
 . "$ROOT/chassis/$chassis_name/filter.sh"
 
 input_path=""
@@ -79,12 +88,12 @@ if [ -d "$input_path" ]; then
   for f in "$input_path"/*.avi "$input_path"/*.mp4 "$input_path"/*.mkv "$input_path"/*.webm; do
     [ -f "$f" ] || continue
     base="$(basename "$f")"
-    process_file "$f" "$out_dir/${base%.*}_${source_name}_${chassis_name}.mkv"
+    process_file "$f" "$out_dir/${base%.*}_${source_name}${condition_name:+_$condition_name}_${chassis_name}.mkv"
     has_files=1
   done
 else
   base="$(basename "$input_path")"
-  process_file "$input_path" "$out_dir/${base%.*}_${source_name}_${chassis_name}.mkv"
+  process_file "$input_path" "$out_dir/${base%.*}_${source_name}${condition_name:+_$condition_name}_${chassis_name}.mkv"
   has_files=1
 fi
 

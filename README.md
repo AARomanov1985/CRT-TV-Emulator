@@ -23,7 +23,11 @@ This models the complete physical hardware path as processing steps:
 ```bash
 chmod +x convert.sh
 ./convert.sh
+```
 
+### Non intercative:
+```
+printf '1\n3\n5\n/path/to/clip.mp4\n' | ./convert.sh
 ```
 
 Output files are written to an `out/` directory alongside the source using the naming pattern:

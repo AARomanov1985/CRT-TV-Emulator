@@ -17,14 +17,16 @@
 #   goldstar_ck20e40  20in color     625/50     576 (525 NTSC capable)
 #   junost_402b       31LK4B 31cm mono  625/50  576 (no chroma decode)
 #   junost_406        31LK4B 31cm mono  625/50  576 (no chroma decode, portable)
+#   rassvet_307       40LK6B 40cm mono    625/50  576 (ULPT-40-III-1 hybrid, mono)
 #   sony_kv_m2180     21in aperture grille  625/50  576 (Trinitron M)
 #   samsung_cs2173    21in shadow mask      625/50  576 (KS1A one-chip)
 #   philips_gr1ax     21in shadow mask      625/50  576 (GR1AX/G90)
 #   daewoo_dtc20u1    20in shadow mask      625/50  576 (CP-002 import budget)
 #
-# The only chassis that behaves differently is junost_402b: its 31LK4B tube
-# has no color decoder. Setting CH_LUMA drops the SIG_CHROMA stage entirely
-# and folds the frame to luma-only, so no chroma work is ever faked for it.
+# The only chassis that behave differently are the monochrome sets
+# (junost_402b, junost_406, rassvet_307): their tubes have no color decoder.
+# Setting CH_LUMA drops the SIG_CHROMA stage entirely and folds the frame to
+# luma-only, so no chroma work is ever faked for them.
 
 # Fuse a cassette model (vhs/<model>) + condition deltas (vhs_cond/<cond>)
 # into the final SIG_* variables that process_file() consumes.
@@ -45,15 +47,60 @@ build_vhs_sig() {
   elif [ -n "$DEG_WAND" ]; then
     SIG_PRE="${SIG_PRE},geq=lum='lum(X,Y)*(${DEG_WAND})':cb='cb(X,Y)':cr='cr(X,Y)'"
   fi
+  if [ -n "${DECK_WAND:-}" ]; then
+    SIG_PRE="${SIG_PRE},geq=lum='lum(X,Y)*(${DECK_WAND})':cb='cb(X,Y)':cr='cr(X,Y)'"
+  fi
+  if [ -n "${DECK_DTC:-}" ]; then
+    SIG_PRE="${SIG_PRE},geq=lum='${DECK_DTC}':cb='cb(X,Y)':cr='cr(X,Y)'"
+  fi
+  if [ -n "${DECK_DENOISE:-}" ]; then
+    SIG_PRE="${SIG_PRE},${DECK_DENOISE}"
+  fi
 
-  SIG_NOISE="noise=alls=$(( TAPE_NOISE + ${DEG_NOISE:-0} )):allf=t+u"
+  SIG_NOISE="noise=alls=$(( TAPE_NOISE + ${DEG_NOISE:-0} + ${DECK_NOISE:-0} )):allf=t+u"
 
   SIG_CHROMA="chromashift=cbh=$(( TAPE_CH_CBH + ${DEG_CBH:-0} )):crh=$(( TAPE_CH_CRH + ${DEG_CRH:-0} )):cbv=$(( TAPE_CH_CBV + ${DEG_CBV:-0} )):crv=$(( TAPE_CH_CRV + ${DEG_CRV:-0} ))"
 
   BG_COLOR=white
-  BG_AMPLITUDE="${DEG_AMP:-$TAPE_AMP}"
-  BG_HIGHPASS="${DEG_HIGHPASS:-$TAPE_HIGHPASS}"
-  BG_LOWPASS="${DEG_LOWPASS:-$TAPE_LOWPASS}"
+  BG_AMPLITUDE="${DECK_AMP:-${DEG_AMP:-$TAPE_AMP}}"
+  BG_HIGHPASS="${DECK_HIGHPASS:-${DEG_HIGHPASS:-$TAPE_HIGHPASS}}"
+  BG_LOWPASS="${DECK_LOWPASS:-${DEG_LOWPASS:-$TAPE_LOWPASS}}"
+}
+
+# Fuse a DVD disc (dvd/<disc>) + player (dvd_player/<player>, which also
+# carries the output connection character) into the final SIG_* variables.
+# DISC_* is the disc baseline (near-transparent, digital), PL_* the decoder
+# character, CONN_* the output path (composite smears, component stays clean).
+
+build_dvd_sig() {
+  sig_pre=""
+
+  [ -n "${PL_RING:-}" ] && sig_pre="${sig_pre:+${sig_pre},}${PL_RING}"
+
+  [ -n "${DISC_BLUR:-}" ] && sig_pre="${sig_pre:+${sig_pre},}boxblur=${DISC_BLUR}"
+
+  [ -n "${PL_BAND:-}" ] && sig_pre="${sig_pre:+${sig_pre},}${PL_BAND}"
+
+  if [ -n "${PL_BLOCK:-}" ]; then
+    sig_pre="${sig_pre:+${sig_pre},}geq=lum='${PL_BLOCK}':cb='cb(X,Y)':cr='cr(X,Y)'"
+  fi
+
+  if [ -n "${CONN_BLUR:-}" ]; then
+    sig_pre="${sig_pre:+${sig_pre},}boxblur=${CONN_BLUR}"
+  fi
+
+  SIG_PRE="$sig_pre"
+  SIG_NOISE="noise=alls=$(( ${DISC_NOISE:-0} + ${PL_NOISE:-0} + ${CONN_NOISE:-0} )):allf=t+u"
+
+  SIG_CHROMA="chromashift=cbh=0:crh=0:cbv=0:crv=0"
+  if [ -n "${CONN_CHROMA:-}" ]; then
+    SIG_CHROMA="$CONN_CHROMA"
+  fi
+
+  BG_COLOR="pink"
+  BG_AMPLITUDE="${CONN_AMP:-0.0002}"
+  BG_HIGHPASS="${CONN_HIGHPASS:-120}"
+  BG_LOWPASS="${CONN_LOWPASS:-14000}"
 }
 
 process_file() {
@@ -62,6 +109,9 @@ process_file() {
 
   audio_count=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$input" | wc -l)
   audio_count=$(echo "$audio_count" | tr -d ' ')
+
+  # Bounding the audio bed: to find the duration of the source video
+  duration=$(ffprobe -v error -select_streams v:0 -show_entries format=duration -of csv=p=0 "$input" | head -1)
 
   video_chain="[0:v]scale=768:576:force_original_aspect_ratio=decrease, \
       pad=768:576:(ow-iw)/2:(oh-ih)/2"
@@ -81,7 +131,7 @@ process_file() {
 
   if [ "$audio_count" -gt 0 ]; then
     filter_complex="${filter_complex}; \
-      anoisesrc=color=${BG_COLOR}:amplitude=${BG_AMPLITUDE}:sample_rate=${AUDIO_RATE},highpass=f=${BG_HIGHPASS},lowpass=f=${BG_LOWPASS}[a_bg_raw]"
+      anoisesrc=color=${BG_COLOR}:amplitude=${BG_AMPLITUDE}:sample_rate=${AUDIO_RATE}:duration=${duration},highpass=f=${BG_HIGHPASS},lowpass=f=${BG_LOWPASS}[a_bg_raw]"
     if [ "$audio_count" -gt 1 ]; then
       bg_split="; [a_bg_raw]asplit=outputs=$audio_count"
       i=0
@@ -96,7 +146,7 @@ process_file() {
 
     i=0
     while [ "$i" -lt "$audio_count" ]; do
-      filter_complex="${filter_complex}; [0:a:$i]aformat=channel_layouts=mono,highpass=f=${AUDIO_HIGHPASS},lowpass=f=${AUDIO_LOWPASS},${AUDIO_EQ}[a_mono$i]; [a_mono$i][bg$i]amix=inputs=2:weights=1 ${BG_WEIGHT}[a_out$i]"
+      filter_complex="${filter_complex}; [0:a:$i]aformat=channel_layouts=mono,highpass=f=${AUDIO_HIGHPASS},lowpass=f=${AUDIO_LOWPASS},${AUDIO_EQ}[a_mono$i]; [a_mono$i][bg$i]amix=inputs=2:weights=1 ${BG_WEIGHT},atrim=duration=${duration}[a_out$i]"
       maps="$maps -map [a_out$i]"
       audio_settings="$audio_settings -c:a:$i aac -ar:a:$i ${AUDIO_RATE} -ac:a:$i 1"
       i=$((i + 1))

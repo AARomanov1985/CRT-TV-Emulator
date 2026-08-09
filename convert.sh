@@ -37,11 +37,13 @@ echo "Choose signal source:"
 while :; do
   echo "  1) TV broadcast signal"
   echo "  2) VHS cassette"
+  echo "  3) DVD disc"
   printf 'Your choice: '
   read src_choice || exit 1
   case "$src_choice" in
     1) source_dir="$ROOT/tv"; break ;;
     2) source_dir="$ROOT/vhs"; break ;;
+    3) source_dir="$ROOT/dvd"; break ;;
   esac
 done
 
@@ -49,20 +51,28 @@ source_name="$(choose_from "$source_dir" "Choose signal:")"
 echo "Selected source: $source_name"
 
 condition_name=""
+player_name=""
 if [ "$src_choice" = "2" ]; then
   condition_name="$(choose_from "$ROOT/vhs_cond" "Choose tape condition:")"
   echo "Selected condition: $condition_name"
+  player_name="$(choose_from "$ROOT/vhs_player" "Choose VHS deck:")"
+  echo "Selected player: $player_name"
+elif [ "$src_choice" = "3" ]; then
+  player_name="$(choose_from "$ROOT/dvd_player" "Choose DVD player:")"
+  echo "Selected player: $player_name"
 fi
 
 chassis_name="$(choose_from "$ROOT/chassis" "Choose TV chassis:")"
 echo "Selected chassis: $chassis_name"
 
 . "$source_dir/$source_name/filter.sh"
-if [ -n "$condition_name" ]; then
-  . "$ROOT/vhs_cond/$condition_name/filter.sh"
-fi
 if [ "$src_choice" = "2" ]; then
+  . "$ROOT/vhs_cond/$condition_name/filter.sh"
+  . "$ROOT/vhs_player/$player_name/filter.sh"
   build_vhs_sig
+elif [ "$src_choice" = "3" ]; then
+  . "$ROOT/dvd_player/$player_name/filter.sh"
+  build_dvd_sig
 fi
 . "$ROOT/chassis/$chassis_name/filter.sh"
 
@@ -91,12 +101,12 @@ if [ -d "$input_path" ]; then
   for f in "$input_path"/*.avi "$input_path"/*.mp4 "$input_path"/*.mkv "$input_path"/*.webm; do
     [ -f "$f" ] || continue
     base="$(basename "$f")"
-    process_file "$f" "$out_dir/${base%.*}_${source_name}${condition_name:+_$condition_name}_${chassis_name}.mkv"
+    process_file "$f" "$out_dir/${base%.*}_${source_name}${condition_name:+_$condition_name}${player_name:+_$player_name}_${chassis_name}.mkv"
     has_files=1
   done
 else
   base="$(basename "$input_path")"
-  process_file "$input_path" "$out_dir/${base%.*}_${source_name}${condition_name:+_$condition_name}_${chassis_name}.mkv"
+  process_file "$input_path" "$out_dir/${base%.*}_${source_name}${condition_name:+_$condition_name}${player_name:+_$player_name}_${chassis_name}.mkv"
   has_files=1
 fi
 

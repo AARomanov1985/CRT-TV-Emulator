@@ -16,5 +16,6 @@ DEG_CRH=-2
 DEG_CBV=2
 DEG_CRV=-1
 DEG_WAND="1+0.12*(lum(X-6,Y)/max(lum(X,Y),0.001)-1)"
-DEG_AMP=0.0038
+DEG_AMP=0.00038
 DEG_LOWPASS=5800
+SIG_CRUSH="acompressor=threshold=0.15:ratio=4:attack=5:release=80,volume=3.5,compand=attacks=0:decays=0:points=-80/-80|-6/-6|-0.1/-6"

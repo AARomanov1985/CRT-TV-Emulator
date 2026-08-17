@@ -15,4 +15,4 @@ AUDIO_HIGHPASS=120
 AUDIO_LOWPASS=9000
 AUDIO_EQ="equalizer=f=1800:width_type=h:width=180:g=2,equalizer=f=400:width_type=h:width=100:g=0.5"
 AUDIO_RATE=22050
-BG_WEIGHT=0.1
+BG_WEIGHT=0.005

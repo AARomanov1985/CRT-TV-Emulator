@@ -20,5 +20,6 @@ DEG_CRH=-1
 DEG_CBV=1
 DEG_CRV=-1
 DEG_WAND="if(lt(abs(Y-mod(N*0.125,540)),5),0.92,1)"
-DEG_AMP=0.0028
+DEG_AMP=0.00028
 DEG_LOWPASS=6800
+SIG_CRUSH="acompressor=threshold=0.15:ratio=4:attack=5:release=80,volume=3.5,compand=attacks=0:decays=0:points=-80/-80|-6/-6|-0.1/-6"

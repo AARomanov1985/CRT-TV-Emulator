@@ -62,7 +62,7 @@ build_vhs_sig() {
   SIG_CHROMA="chromashift=cbh=$(( TAPE_CH_CBH + ${DEG_CBH:-0} )):crh=$(( TAPE_CH_CRH + ${DEG_CRH:-0} )):cbv=$(( TAPE_CH_CBV + ${DEG_CBV:-0} )):crv=$(( TAPE_CH_CRV + ${DEG_CRV:-0} ))"
 
   BG_COLOR=white
-  BG_AMPLITUDE="${DECK_AMP:-${DEG_AMP:-$TAPE_AMP}}"
+  BG_WEIGHT="${DECK_AMP:-${DEG_AMP:-$TAPE_AMP}}"
   BG_HIGHPASS="${DECK_HIGHPASS:-${DEG_HIGHPASS:-$TAPE_HIGHPASS}}"
   BG_LOWPASS="${DECK_LOWPASS:-${DEG_LOWPASS:-$TAPE_LOWPASS}}"
 }
@@ -98,7 +98,7 @@ build_dvd_sig() {
   fi
 
   BG_COLOR="pink"
-  BG_AMPLITUDE="${CONN_AMP:-0.0002}"
+  BG_WEIGHT="${CONN_AMP:-0.0002}"
   BG_HIGHPASS="${CONN_HIGHPASS:-120}"
   BG_LOWPASS="${CONN_LOWPASS:-14000}"
 }
@@ -130,8 +130,16 @@ process_file() {
   audio_settings=""
 
   if [ "$audio_count" -gt 0 ]; then
+    # Audio bed: the noise source runs at full scale; amix weights=1 ${BG_WEIGHT}
+    # with default normalize makes BG_WEIGHT the exact output noise/signal
+    # amplitude ratio (0.1 = -20 dB, 1.0 = equal, 2.0 = noise dominates).
+    # It is set by the signal source (tv/<variant>, vhs/tape+condition+deck,
+    # dvd/connection); the chassis value is only a fallback.
+    # BG_HIGHPASS/BG_LOWPASS bound the WHOLE audio path - voice and noise
+    # alike, since both share the set's amplifier/speaker. The chassis
+    # AUDIO_HIGHPASS/AUDIO_LOWPASS only serve as fallback.
     filter_complex="${filter_complex}; \
-      anoisesrc=color=${BG_COLOR}:amplitude=${BG_AMPLITUDE}:sample_rate=${AUDIO_RATE}:duration=${duration},highpass=f=${BG_HIGHPASS},lowpass=f=${BG_LOWPASS}[a_bg_raw]"
+      anoisesrc=color=${BG_COLOR}:sample_rate=${AUDIO_RATE}:duration=${duration},highpass=f=${BG_HIGHPASS:-${AUDIO_HIGHPASS}},lowpass=f=${BG_LOWPASS:-${AUDIO_LOWPASS}}[a_bg_raw]"
     if [ "$audio_count" -gt 1 ]; then
       bg_split="; [a_bg_raw]asplit=outputs=$audio_count"
       i=0
@@ -146,7 +154,12 @@ process_file() {
 
     i=0
     while [ "$i" -lt "$audio_count" ]; do
-      filter_complex="${filter_complex}; [0:a:$i]aformat=channel_layouts=mono,highpass=f=${AUDIO_HIGHPASS},lowpass=f=${AUDIO_LOWPASS},${AUDIO_EQ}[a_mono$i]; [a_mono$i][bg$i]amix=inputs=2:weights=1 ${BG_WEIGHT},atrim=duration=${duration}[a_out$i]"
+      # SIG_CRUSH (optional, set by the signal source) models AGC overload on
+      # weak reception: compression plus hard clipping after voice+noise are
+      # mixed, so the whole path distorts the way a real demodulator does.
+      mix_chain="[a_mono$i][bg$i]amix=inputs=2:weights=1 ${BG_WEIGHT}"
+      [ -n "${SIG_CRUSH:-}" ] && mix_chain="${mix_chain},${SIG_CRUSH}"
+      filter_complex="${filter_complex}; ${mix_chain},atrim=duration=${duration}[a_out$i]"
       maps="$maps -map [a_out$i]"
       audio_settings="$audio_settings -c:a:$i aac -ar:a:$i ${AUDIO_RATE} -ac:a:$i 1"
       i=$((i + 1))
@@ -158,7 +171,7 @@ process_file() {
     -map 0:s? \
     -pix_fmt yuv420p \
     -c:v libx264 \
-    -b:v 2500k \
+    -b:v 2000k \
     $audio_settings \
     -c:s copy \
     -shortest \

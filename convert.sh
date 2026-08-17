@@ -65,6 +65,11 @@ fi
 chassis_name="$(choose_from "$ROOT/chassis" "Choose TV chassis:")"
 echo "Selected chassis: $chassis_name"
 
+# Chassis first: it sets CH_*/AUDIO_* and a default BG_WEIGHT. Signal
+# sources below override BG_WEIGHT, since the noise ratio is a property
+# of the signal, not the set.
+. "$ROOT/chassis/$chassis_name/filter.sh"
+
 . "$source_dir/$source_name/filter.sh"
 if [ "$src_choice" = "2" ]; then
   . "$ROOT/vhs_cond/$condition_name/filter.sh"
@@ -74,7 +79,6 @@ elif [ "$src_choice" = "3" ]; then
   . "$ROOT/dvd_player/$player_name/filter.sh"
   build_dvd_sig
 fi
-. "$ROOT/chassis/$chassis_name/filter.sh"
 
 input_path=""
 if [ $# -ge 1 ]; then

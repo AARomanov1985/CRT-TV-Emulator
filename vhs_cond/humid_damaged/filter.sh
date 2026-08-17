@@ -18,6 +18,7 @@ DEG_CRH=-3
 DEG_CBV=2
 DEG_CRV=-2
 DEG_LUM="if(lt(abs(Y - mod(N*40,540)),2), lum(max(0,X-9),Y), lum(X,Y)) + if(lt(Y, mod(N*23,540)+26)*gt(Y, mod(N*23,540)), if(lt(mod(X*47+Y*23+N*13,13),2),255,0),0)"
-DEG_AMP=0.0045
+DEG_AMP=0.00045
 DEG_HIGHPASS=90
 DEG_LOWPASS=4800
+SIG_CRUSH="acompressor=threshold=0.15:ratio=4:attack=5:release=80,volume=3.5,compand=attacks=0:decays=0:points=-80/-80|-6/-6|-0.1/-6"

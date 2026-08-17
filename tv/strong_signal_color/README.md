@@ -1,6 +1,7 @@
 # Strong signal (color)
 
-Full carrier, full luma bandwidth, low noise floor. `alls=3`.
+Clean tuner, near-transparent reception: `alls=8`, minimal chroma drift
+`cbh=1/crh=-1`, audio 90-13000 Hz.
 
 Reference, GoldStar:
 
@@ -21,3 +22,11 @@ GR1AX:
 CP-002:
 
 ![daewoo_dtc20u1](daewoo_dtc20u1.png)
+
+Gorizont:
+
+![gorizont_51tc412](gorizont_51tc412.png)
+
+Photon:
+
+![photon_51tc408d](photon_51tc408d.png)

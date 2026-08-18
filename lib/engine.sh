@@ -154,12 +154,15 @@ process_file() {
 
     i=0
     while [ "$i" -lt "$audio_count" ]; do
-      # SIG_CRUSH (optional, set by the signal source) models AGC overload on
-      # weak reception: compression plus hard clipping after voice+noise are
-      # mixed, so the whole path distorts the way a real demodulator does.
+      # Voice chain: downmix each input track to mono, band-limit the whole
+      # path via BG_HIGHPASS/BG_LOWPASS (chassis AUDIO_* as fallback), then
+      # the chassis tone/EQ. SIG_CRUSH (optional, set by the signal source)
+      # models AGC overload: compression plus hard clipping after voice+noise
+      # are mixed, so the whole path distorts the way a real demodulator does.
+      mono_chain="[0:a:$i]aformat=channel_layouts=mono,highpass=f=${BG_HIGHPASS:-${AUDIO_HIGHPASS}},lowpass=f=${BG_LOWPASS:-${AUDIO_LOWPASS}},${AUDIO_EQ}[a_mono$i]"
       mix_chain="[a_mono$i][bg$i]amix=inputs=2:weights=1 ${BG_WEIGHT}"
       [ -n "${SIG_CRUSH:-}" ] && mix_chain="${mix_chain},${SIG_CRUSH}"
-      filter_complex="${filter_complex}; ${mix_chain},atrim=duration=${duration}[a_out$i]"
+      filter_complex="${filter_complex}; ${mono_chain}; ${mix_chain},atrim=duration=${duration}[a_out$i]"
       maps="$maps -map [a_out$i]"
       audio_settings="$audio_settings -c:a:$i aac -ar:a:$i ${AUDIO_RATE} -ac:a:$i 1"
       i=$((i + 1))

@@ -15,7 +15,7 @@ INPUT="$1"
 
 command -v ffmpeg >/dev/null || { echo "Critical error: ffmpeg not found" >&2; exit 1; }
 
-VF="scale=640:-2,hue=s=0,eq=contrast=1.2:brightness=-0.1,colorbalance=bs=0.25:bm=0.12:bh=0.08"
+VF="scale=640:-2,hue=s=0,eq=contrast=1.2:brightness=-0.05,colorbalance=bs=0.15:bm=0.08:gs=0.08:gm=0.04"
 
 transcode() {
   in="$1"

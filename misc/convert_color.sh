@@ -1,10 +1,4 @@
 #!/bin/bash
-# Simple B/W convert: libx264, 768k video, 640px wide, grayscale, +20% contrast.
-# Keeps ALL audio tracks and ALL subtitles.
-# Usage: ./convert_bw.sh <input> [output]
-#   <input>   video file or directory (avi/mp4/mkv/webm/mov)
-#   [output]  output file (single-file mode) or output dir (batch mode).
-#             Default: <input_dir>/out or ./out
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
@@ -17,7 +11,7 @@ INPUT="$1"
 
 command -v ffmpeg >/dev/null || { echo "Critical error: ffmpeg not found" >&2; exit 1; }
 
-VF="scale=640:-2,hue=s=0,eq=contrast=1.2:brightness=-0.1"
+VF="scale=640:-2,hue=s=0.8,eq=contrast=1.2:brightness=-0.1"
 
 transcode() {
   in="$1"
@@ -41,7 +35,7 @@ if [ -d "$INPUT" ]; then
   for f in "$INPUT"/*.avi "$INPUT"/*.mp4 "$INPUT"/*.mkv "$INPUT"/*.webm "$INPUT"/*.mov; do
     [ -f "$f" ] || continue
     base="$(basename "$f")"
-    transcode "$f" "$OUT_DIR/${base%.*}_bw640.mkv"
+    transcode "$f" "$OUT_DIR/${base%.*}_color640.mkv"
     found=1
   done
   [ "$found" -eq 1 ] || { echo "Critical error: no video files found in $INPUT" >&2; exit 1; }
@@ -52,12 +46,12 @@ else
   else
     dir="$(dirname "$INPUT")"
     base="$(basename "$INPUT")"
-    OUTPUT="$dir/out/${base%.*}_bw640.mkv"
+    OUTPUT="$dir/out/${base%.*}_color640.mkv"
   fi
   # Allow output to be an existing directory.
   if [ -d "$OUTPUT" ]; then
     base="$(basename "$INPUT")"
-    OUTPUT="$OUTPUT/${base%.*}_bw640.mkv"
+    OUTPUT="$OUTPUT/${base%.*}_color640.mkv"
   fi
   transcode "$INPUT" "$OUTPUT"
   echo "Done. Output: $OUTPUT"

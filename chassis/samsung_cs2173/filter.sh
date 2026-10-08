@@ -10,6 +10,8 @@ CH_EQ="eq=saturation=1.06:brightness=0.005:contrast=1.05:gamma=1.06"
 CH_GRID="drawgrid=w=768:h=2:c=black@0.13:t=1"
 CH_CURVES="curves=m='0/0.07 0.5/0.5 1/0.9'"
 CH_VIGNETTE="vignette=angle=PI/6"
+# White-point tint: hot Korean vivid push, still faintly cool when aged.
+CH_TINT="colorbalance=bs=0.08:bm=0.05"
 
 AUDIO_HIGHPASS=120
 AUDIO_LOWPASS=9000

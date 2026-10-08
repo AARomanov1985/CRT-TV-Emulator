@@ -7,6 +7,8 @@ CH_EQ="eq=saturation=0.90:brightness=-0.004:contrast=1.06:gamma=1.04"
 CH_GRID="drawgrid=w=768:h=2:c=black@0.13:t=1"
 CH_CURVES="curves=m='0/0.04 0.5/0.48 1/0.95'"
 CH_VIGNETTE="vignette=angle=PI/6.8"
+# White-point tint: aged sulfide phosphors, blue faded first, whites drift warm.
+CH_TINT="colorbalance=bs=-0.05:bm=-0.03"
 
 AUDIO_HIGHPASS=140
 AUDIO_LOWPASS=9000

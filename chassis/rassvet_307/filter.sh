@@ -10,6 +10,8 @@ CH_EQ="eq=brightness=-0.005:contrast=1.1:gamma=1.05"
 CH_GRID="drawgrid=w=768:h=2:c=black@0.14:t=1"
 CH_CURVES="curves=m='0/0.05 0.5/0.47 1/0.93'"
 CH_VIGNETTE="vignette=angle=PI/6"
+# White-point tint: 1975 tube, oldest of the lot, warmest gray.
+CH_TINT="colorbalance=bs=-0.08:bm=-0.05"
 
 AUDIO_HIGHPASS=150
 AUDIO_LOWPASS=8000

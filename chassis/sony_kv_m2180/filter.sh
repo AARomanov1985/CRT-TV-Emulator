@@ -10,6 +10,8 @@ CH_EQ="eq=saturation=1.08:brightness=-0.01:contrast=1.15:gamma=1.0"
 CH_GRID="drawgrid=w=768:h=2:c=black@0.08:t=1"
 CH_CURVES="curves=m='0/0.02 0.5/0.48 1/0.98'"
 CH_VIGNETTE="vignette=angle=PI/9"
+# White-point tint: factory Cool default heritage, still faintly blue when aged.
+CH_TINT="colorbalance=bs=0.08:bm=0.05"
 
 AUDIO_HIGHPASS=90
 AUDIO_LOWPASS=14000

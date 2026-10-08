@@ -169,7 +169,7 @@ process_file() {
     done
   fi
 
-  eval "ffmpeg -y -i \"$input\" -filter_complex \"$filter_complex\" \
+  eval "ffmpeg -nostdin -y -i \"$input\" -filter_complex \"$filter_complex\" \
     $maps \
     -map 0:s? \
     -pix_fmt yuv420p \

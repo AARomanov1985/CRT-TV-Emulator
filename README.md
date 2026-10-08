@@ -41,9 +41,19 @@ printf '1\n3\n5\n/path/to/clip.mp4\n' | ./convert.sh
 
 Output files are written to an `out/` directory alongside the source using the naming pattern: `<basename>_<source>[_<condition>]_<player>_<chassis>.mkv`
 
-## Misc
+## Lite
 
-`misc/` contains simple one-time scripts 
+`lite/` contains simple per-chassis scripts — one per set in `chassis/`
+(daewoo_dtc20u1, electron_51tc433d, funai_tv2000mk7, goldstar_ck20e40,
+gorizont_51tc412, gorizont_736, junost_402b, junost_406, philips_gr1ax,
+photon_51tc408d, rassvet_307, rubin_51tc, samsung_cs2173, sony_kv_m2180).
+
+Video is tone-only: 640px wide + the chassis EQ/CURVES (plus LUMA fold on the
+three mono sets). Spatial stages (blur/grid/vignette) are dropped.
+Audio is the chassis speaker band + EQ with a pink-noise bed.
+Each script sources its `chassis/*/filter.sh`, so tone stays in one place.
+
+Usage: `./lite/sony_kv_m2180.sh <input> [output]` — keeps all audio tracks and subtitles.
 
 ## License
 

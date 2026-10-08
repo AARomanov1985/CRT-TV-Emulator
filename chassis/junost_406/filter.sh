@@ -11,6 +11,8 @@ CH_EQ="eq=brightness=-0.02:contrast=1.15:gamma=0.95"
 CH_GRID="drawgrid=w=768:h=2:c=black@0.16:t=1"
 CH_CURVES="curves=m='0/0.08 0.5/0.48 1/0.9'"
 CH_VIGNETTE="vignette=angle=PI/4.8"
+# White-point tint: aged P4, blue component faded, gray drifts warm.
+CH_TINT="colorbalance=bs=-0.05:bm=-0.03"
 
 AUDIO_HIGHPASS=250
 AUDIO_LOWPASS=6500

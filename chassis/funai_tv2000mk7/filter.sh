@@ -7,6 +7,8 @@ CH_EQ="eq=saturation=1.02:brightness=-0.001:contrast=1.12:gamma=1.00"
 CH_GRID="drawgrid=w=768:h=2:c=black@0.10:t=1"
 CH_CURVES="curves=m='0/0.02 0.5/0.50 1/0.98'"
 CH_VIGNETTE="vignette=angle=PI/7.5"
+# White-point tint: Japanese set, near-neutral, whisper of cool.
+CH_TINT="colorbalance=bs=0.04:bm=0.02"
 
 AUDIO_HIGHPASS=100
 AUDIO_LOWPASS=12500

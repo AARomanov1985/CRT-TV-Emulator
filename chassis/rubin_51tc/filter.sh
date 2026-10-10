@@ -8,7 +8,7 @@ CH_GRID="drawgrid=w=768:h=2:c=black@0.14:t=1"
 CH_CURVES="curves=m='0/0.05 0.5/0.48 1/0.94'"
 CH_VIGNETTE="vignette=angle=PI/6.5"
 # White-point tint: well-worn classic, blue faded first, whites drift warm.
-CH_TINT="colorbalance=bs=-0.06:bm=-0.03"
+CH_TINT="colorbalance=bs=-0.09:bm=-0.045"
 
 AUDIO_HIGHPASS=150
 AUDIO_LOWPASS=9500

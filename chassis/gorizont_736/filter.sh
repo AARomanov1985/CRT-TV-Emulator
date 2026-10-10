@@ -12,7 +12,7 @@ CH_GRID="drawgrid=w=768:h=2:c=black@0.10:t=1"
 CH_CURVES="curves=m='0/0.03 0.5/0.5 1/0.95'"
 CH_VIGNETTE="vignette=angle=PI/6.8"
 # White-point tint: flagship kept well, only a faint warm drift.
-CH_TINT="colorbalance=bs=-0.03:bm=-0.02"
+CH_TINT="colorbalance=bs=-0.045:bm=-0.03"
 
 AUDIO_HIGHPASS=65
 AUDIO_LOWPASS=12600

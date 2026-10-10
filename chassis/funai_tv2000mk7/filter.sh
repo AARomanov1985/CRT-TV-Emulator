@@ -8,7 +8,7 @@ CH_GRID="drawgrid=w=768:h=2:c=black@0.10:t=1"
 CH_CURVES="curves=m='0/0.02 0.5/0.50 1/0.98'"
 CH_VIGNETTE="vignette=angle=PI/7.5"
 # White-point tint: Japanese set, near-neutral, whisper of cool.
-CH_TINT="colorbalance=bs=0.04:bm=0.02"
+CH_TINT="colorbalance=bs=0.06:bm=0.03"
 
 AUDIO_HIGHPASS=100
 AUDIO_LOWPASS=12500

@@ -10,7 +10,7 @@ CH_GRID="drawgrid=w=768:h=2:c=black@0.16:t=1"
 CH_CURVES="curves=m='0/0.09 0.5/0.5 1/0.88'"
 CH_VIGNETTE="vignette=angle=PI/5"
 # White-point tint: retail blue-push remnant, muted by the muddy glass.
-CH_TINT="colorbalance=bs=0.07:bm=0.04"
+CH_TINT="colorbalance=bs=0.105:bm=0.06"
 
 AUDIO_HIGHPASS=150
 AUDIO_LOWPASS=9000

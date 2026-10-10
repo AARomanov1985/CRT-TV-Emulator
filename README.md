@@ -48,12 +48,15 @@ Output files are written to an `out/` directory alongside the source using the n
 gorizont_51tc412, gorizont_736, junost_402b, junost_406, philips_gr1ax,
 photon_51tc408d, rassvet_307, rubin_51tc, samsung_cs2173, sony_kv_m2180).
 
-Video is tone-only: 640px wide + the chassis EQ/CURVES (plus LUMA fold on the
-three mono sets). Spatial stages (blur/grid/vignette) are dropped.
+Video is the full chassis path: 576px high (625-line raster) + tube blur,
+EQ, white-point tint, shadow mask, tone curves and vignette. Only signal
+stages (noise/ghost/chroma-shift) stay out.
 Audio is the chassis speaker band + EQ with a pink-noise bed.
 Each script sources its `chassis/*/filter.sh`, so tone stays in one place.
 
 Usage: `./lite/sony_kv_m2180.sh <input> [output]` — keeps all audio tracks and subtitles.
+
+`LITE_ULTRA=1` drops blur/mask/vignette: tone only (output gets a `u` suffix mark).
 
 ## License
 

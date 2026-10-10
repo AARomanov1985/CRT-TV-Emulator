@@ -3,7 +3,10 @@
 # Every set is treated as fed by a moderate broadcast: the TV signal bed
 # (BG_*/SIG_CRUSH) overrides the chassis fallback, same precedence as
 # lib/engine.sh. Mono sets get the moderate BW bed, color sets the color one.
-# Video is tone-only (LUMA?/EQ/TINT/CURVES).
+# Video is the full chassis path (LUMA?/BLUR/EQ/TINT/GRID/CURVES/VIGNETTE),
+# only signal stages (noise/ghost/chroma-shift) stay out. Grid geometry is
+# rebuilt per frame width (CH_GRID is tuned for the 768 canvas).
+# LITE_ULTRA=1 drops the spatial stages (BLUR/GRID/VIGNETTE): tone only.
 
 ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 . "$ROOT/chassis/${CHASSIS}/filter.sh"
@@ -13,17 +16,26 @@ else
   . "$ROOT/tv/moderate_signal_color/filter.sh"
 fi
 
-SUFFIX="_lite_${CHASSIS}_640"
+SUFFIX="_lite_${CHASSIS}_576"
+[ "${LITE_ULTRA:-0}" = "1" ] && SUFFIX="${SUFFIX}u"
 
 lite_transcode() {
   input="$1"
   output="$2"
 
-  VF="scale=640:-2"
+  VF="scale=-2:576"
   [ -n "${CH_LUMA:-}" ] && VF="${VF},${CH_LUMA}"
+  [ "${LITE_ULTRA:-0}" != "1" ] && VF="${VF},${CH_BLUR}"
   VF="${VF},${CH_EQ}"
   [ -n "${CH_TINT:-}" ] && VF="${VF},${CH_TINT}"
+  if [ "${LITE_ULTRA:-0}" != "1" ]; then
+    GRID_C="${CH_GRID:-}"
+    GRID_C="${GRID_C##*:c=}"
+    GRID_C="${GRID_C%%:t=*}"
+    [ -n "$GRID_C" ] && VF="${VF},drawgrid=w=iw:h=2:c=${GRID_C}:t=1"
+  fi
   VF="${VF},${CH_CURVES}"
+  [ "${LITE_ULTRA:-0}" != "1" ] && VF="${VF},${CH_VIGNETTE}"
 
   audio_count=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$input" | wc -l)
   audio_count=$(echo "$audio_count" | tr -d ' ')
@@ -66,7 +78,7 @@ lite_transcode() {
     -map 0:s? \
     -pix_fmt yuv420p \
     -c:v libx264 \
-    -b:v 1024k \
+    -b:v 1000k \
     $audio_settings \
     -c:s copy \
     -shortest \

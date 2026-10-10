@@ -48,7 +48,7 @@ Output files are written to an `out/` directory alongside the source using the n
 gorizont_51tc412, gorizont_736, junost_402b, junost_406, philips_gr1ax,
 photon_51tc408d, rassvet_307, rubin_51tc, samsung_cs2173, sony_kv_m2180).
 
-Video is the full chassis path: 576px high (625-line raster) + tube blur,
+Video is the full chassis path: 400px high + tube blur,
 EQ, white-point tint, shadow mask, tone curves and vignette. Only signal
 stages (noise/ghost/chroma-shift) stay out.
 Audio is the chassis speaker band + EQ with a pink-noise bed.

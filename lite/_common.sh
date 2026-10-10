@@ -16,14 +16,14 @@ else
   . "$ROOT/tv/moderate_signal_color/filter.sh"
 fi
 
-SUFFIX="_lite_${CHASSIS}_576"
+SUFFIX="_lite_${CHASSIS}_400"
 [ "${LITE_ULTRA:-0}" = "1" ] && SUFFIX="${SUFFIX}u"
 
 lite_transcode() {
   input="$1"
   output="$2"
 
-  VF="scale=-2:576"
+  VF="scale=-2:400"
   [ -n "${CH_LUMA:-}" ] && VF="${VF},${CH_LUMA}"
   [ "${LITE_ULTRA:-0}" != "1" ] && VF="${VF},${CH_BLUR}"
   VF="${VF},${CH_EQ}"

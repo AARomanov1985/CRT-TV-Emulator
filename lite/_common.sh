@@ -15,6 +15,9 @@ if [ -n "${CH_LUMA:-}" ]; then
 else
   . "$ROOT/tv/moderate_signal_color/filter.sh"
 fi
+# Lite never touches loudness: no AGC crush, no volume boost. Hiss and
+# band limits stay, level passes through.
+unset SIG_CRUSH
 
 SUFFIX="_lite_${CHASSIS}_400"
 [ "${LITE_ULTRA:-0}" = "1" ] && SUFFIX="${SUFFIX}u"
@@ -63,9 +66,7 @@ lite_transcode() {
     i=0
     while [ "$i" -lt "$audio_count" ]; do
       mono_chain="[0:a:$i]aformat=channel_layouts=mono,highpass=f=${BG_HIGHPASS},lowpass=f=${BG_LOWPASS},${AUDIO_EQ} [a_mono$i]"
-      mix_chain="[a_mono$i][bg$i]amix=inputs=2:weights=1 ${BG_WEIGHT}"
-      [ -n "${SIG_CRUSH:-}" ] && mix_chain="${mix_chain},${SIG_CRUSH}"
-      mix_chain="${mix_chain},atrim=duration=${duration} [a_out$i]"
+      mix_chain="[a_mono$i][bg$i]amix=inputs=2:weights=1 ${BG_WEIGHT},atrim=duration=${duration} [a_out$i]"
       filter_complex="${filter_complex}; ${mono_chain}; ${mix_chain}"
       maps="$maps -map [a_out$i]"
       audio_settings="$audio_settings -c:a:$i aac -ar:a:$i ${AUDIO_RATE} -ac:a:$i 1"

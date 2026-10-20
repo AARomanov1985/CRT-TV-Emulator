@@ -58,6 +58,19 @@ Usage: `./lite/sony_kv_m2180.sh <input> [output]` — keeps all audio tracks and
 
 `LITE_ULTRA=1` drops blur/mask/vignette: tone only (output gets a `u` suffix mark).
 
+## Screenshots
+
+`tools/screenshots.sh` regenerates the PNG gallery in `chassis/` and `tv/`
+from a source clip. Every picture is one frame pushed through the same filter
+chain `lib/engine.sh` builds for a real transcode, so the gallery always
+matches what `convert.sh` outputs.
+
+Usage: `./tools/screenshots.sh <source_video> [timestamp]` — the frame defaults
+to 3s. `--signal`, `--chassis` and `--time` narrow the run.
+
+`lib/engine.sh::build_video_chain` is the single source of truth for the
+chain; the tool calls it rather than duplicating the stage order.
+
 ## License
 
 MIT

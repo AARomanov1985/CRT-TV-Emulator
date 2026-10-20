@@ -103,6 +103,32 @@ build_dvd_sig() {
   BG_LOWPASS="${CONN_LOWPASS:-14000}"
 }
 
+# Build the video filter chain for the currently sourced signal + chassis.
+# Emits a bare chain (no [0:v]/[v_crt] labels) so it can be fed to -vf as-is.
+# Single source of truth: process_file() and tools/screenshots.sh both use
+# this, so a screenshot can never drift from what a real transcode produces.
+build_video_chain() {
+  chain="scale=768:576:force_original_aspect_ratio=decrease,pad=768:576:(ow-iw)/2:(oh-ih)/2"
+  if [ -n "${SIG_PRE:-}" ]; then
+    chain="${chain}, ${SIG_PRE}"
+  fi
+  chain="${chain}, ${SIG_NOISE}"
+  if [ -n "${CH_LUMA:-}" ]; then
+    chain="${chain}, ${CH_LUMA}"
+  else
+    chain="${chain}, ${SIG_CHROMA}"
+  fi
+  chain="${chain}, ${CH_BLUR}, ${CH_EQ}"
+  # White-point tint: part of the chassis character (aged phosphors, retail
+  # blue push). Mono sets fold to luma first, so the tint shifts the whole
+  # grey frame warm - which is what an aged single-phosphor tube looks like.
+  if [ -n "${CH_TINT:-}" ]; then
+    chain="${chain}, ${CH_TINT}"
+  fi
+  chain="${chain}, ${CH_GRID}, ${CH_CURVES}, ${CH_VIGNETTE}"
+  echo "$chain"
+}
+
 process_file() {
   input="$1"
   output="$2"
@@ -113,16 +139,7 @@ process_file() {
   # Bounding the audio bed: to find the duration of the source video
   duration=$(ffprobe -v error -select_streams v:0 -show_entries format=duration -of csv=p=0 "$input" | head -1)
 
-  video_chain="[0:v]scale=768:576:force_original_aspect_ratio=decrease, \
-      pad=768:576:(ow-iw)/2:(oh-ih)/2"
-  [ -n "${SIG_PRE}" ] && video_chain="${video_chain}, ${SIG_PRE}"
-  video_chain="${video_chain}, ${SIG_NOISE}"
-  if [ -n "${CH_LUMA}" ]; then
-    video_chain="${video_chain}, ${CH_LUMA}"
-  else
-    video_chain="${video_chain}, ${SIG_CHROMA}"
-  fi
-  video_chain="${video_chain}, ${CH_BLUR}, ${CH_EQ}, ${CH_GRID}, ${CH_CURVES}, ${CH_VIGNETTE} [v_crt]"
+  video_chain="[0:v]$(build_video_chain) [v_crt]"
 
   filter_complex="$video_chain"
 
